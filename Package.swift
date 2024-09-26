@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "Reorderable",
     platforms: [
-      .iOS(.v18),
+      .iOS(SupportedPlatform.IOSVersion.v18),
     ],
     products: [
         .library(
