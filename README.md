@@ -3,7 +3,7 @@ A pure SwiftUI structural component that allows for easy drag-and-drop reorderin
 
 ![An animated recording of the Vis app, where the user selects the "Reorder Blocks" option and then proceeds to drag blocks from the planned workout around, rearranging their order.](/Documentation/visdemo.gif)
 
-This currently only a `ReorderableVStack` generated from a collection of identifiable data (similar to this [SwiftUI `List` initializer](https://developer.apple.com/documentation/swiftui/list/init%28_:rowcontent:%29-7vpgz)). More containers are going to come as needed, but feel free to submit an issue or a PR if there is something you'd like to see.
+This currently only contains a `ReorderableVStack` that takes in a collection of identifiable data and a `ViewBuilder` (similar to this [SwiftUI `List` initializer](https://developer.apple.com/documentation/swiftui/list/init%28_:rowcontent:%29-7vpgz)). More containers are going to come as needed, but feel free to submit an issue or a PR if there is something you'd like to see.
 
 ## Features
 
