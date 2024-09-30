@@ -3,12 +3,17 @@ A pure SwiftUI structural component that allows for easy drag-and-drop reorderin
 
 ![An animated recording of the Vis app, where the user selects the "Reorder Blocks" option and then proceeds to drag blocks from the planned workout around, rearranging their order.](/Documentation/visdemo.gif)
 
-This currently only contains a `ReorderableVStack` that takes in a collection of identifiable data and a `ViewBuilder` (similar to this [SwiftUI `List` initializer](https://developer.apple.com/documentation/swiftui/list/init%28_:rowcontent:%29-7vpgz)). More containers are going to come as needed, but feel free to submit an issue or a PR if there is something you'd like to see.
+This currently contains a `ReorderableVStack` and a `ReorderableHStack` that take in a collection of identifiable data and a `ViewBuilder` (similar to this [SwiftUI `List` initializer](https://developer.apple.com/documentation/swiftui/list/init%28_:rowcontent:%29-7vpgz)). However, because these take in a collection rather than a `Binding` to a collection, there are some key differences, namely: 
+
+- The need for the `onMove` parameter.
+- Can't directly mutate the parameter of the `ViewBuilder`.
+
+The second point makes it kind of tedious (but not impossible, see nested sample) to nest the two containers. A version that takes in bindings will come eventually.
 
 ## Features
 
 - Specify your own drag handle with the `.dragHandle()` modifier
-- Disable/Enable dragging via the `.dragDisabled(_ dragDisabled: Bool)` modifier, which plays nicely with animations (as opposed to adding/removing a `.onDrag()` modifier)!
+- Disable/Enable dragging via the `.dragDisabled(_ dragDisabled: Bool)` modifier, which plays nicely with animations (as opposed to adding/removing a `.onDrag()` modifier)
 - Easily customize your drag state via a `isDragged` parameter passed to your `content` `ViewBuilder`. 
 
 ## Installation
@@ -138,4 +143,53 @@ struct SimpleExample: View {
 }
 ```
 
+### Nested `ReorderableHStack` in `ReorderableVStack`
 
+```swift
+private struct Sample2D: Identifiable {
+  var id: UUID = UUID()
+  var row: [Sample]
+}
+
+struct SimpleExample: View {
+  @State var data: [Sample2D] = [
+    .init(row: [.init(UIColor.systemBlue, 1, 200), .init(UIColor.systemGreen, 2, 100), .init(UIColor.systemGray, 3, 200)]),
+    .init(row: [.init(UIColor.systemRed, 1, 200), .init(UIColor.systemMint, 2, 100), .init(UIColor.systemPurple, 3, 200)]),
+    .init(row: [.init(UIColor.systemIndigo, 1, 200), .init(UIColor.systemTeal, 2, 100), .init(UIColor.systemYellow, 3, 200)]),
+  ]
+
+  ReorderableVStack(data, onMove: { from, to in
+    withAnimation {
+      data.move(fromOffsets: IndexSet(integer: from),
+                toOffset: (to > from) ? to + 1 : to)
+    }
+  }) { sample in
+    HStack {
+      ZStack {
+        RoundedRectangle(cornerRadius: 24, style: .continuous)
+          .fill(Color(UIColor.systemOrange))
+          .frame(width: 64, height: 64)
+          .padding()
+       
+        Image(systemName: "line.3.horizontal")
+          .foregroundStyle(.secondary)
+          .padding()
+      }
+      .dragHandle()
+      
+      ReorderableHStack(sample.row, onMove: { from, to in
+        withAnimation {
+          let index = data.firstIndex(where: {$0.id == sample.id})!
+          data[index].row.move(fromOffsets: IndexSet(integer: from),
+                                   toOffset: (to > from) ? to + 1 : to)
+        }
+      }) { sample in
+        RoundedRectangle(cornerRadius: 24, style: .continuous)
+          .fill(Color(sample.color))
+          .frame(width: 64, height: 64)
+          .padding()
+      }
+    }
+  }
+}
+```

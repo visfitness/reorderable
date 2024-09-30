@@ -1,17 +1,15 @@
 import SwiftUI
 
-
-
-/// A view that arranges its subviews in a vertical line and allows reordering of its elements by drag and dropping.
+/// A view that arranges its subviews in a horizontal line and allows reordering of its elements by drag and dropping.
 ///
 /// Note that this doesn't participate in iOS standard drag-and-drop mechanism and thus dragged elements can't be dropped into other views modified with `.onDrop`.
 @available(iOS 18.0, *)
-public struct ReorderableVStack<Data: RandomAccessCollection, Content: View>: View where Data.Element: Identifiable, Data.Index == Int {
+public struct ReorderableHStack<Data: RandomAccessCollection, Content: View>: View where Data.Element: Identifiable, Data.Index == Int {
   
-  /// Creates a reorderable vertical stack that computes its rows on demand from an underlying collection of identifiable data, with the added information of whether the user is currently dragging the element.
+  /// Creates a reorderable horizontal stack that computes its rows on demand from an underlying collection of identifiable data, with the added information of whether the user is currently dragging the element.
   ///
   /// - Parameters:
-  ///   - data: A collection of identifiable data for computing the vertical stack
+  ///   - data: A collection of identifiable data for computing the horizontal stack
   ///   - onMove: A callback triggered whenever two elements had their positions switched
   ///   - content: A view builder that creates the view for a single element of the list, with an extra boolean parameter indicating whether the user is currently dragging the element.
   public init(_ data: Data, onMove: @escaping (Int, Int) -> Void, content: @escaping (Data.Element, Bool) -> Content) {
@@ -20,10 +18,10 @@ public struct ReorderableVStack<Data: RandomAccessCollection, Content: View>: Vi
     self.content = content
   }
   
-  /// Creates a reorderable vertical stack that computes its rows on demand from an underlying collection of identifiable data.
+  /// Creates a reorderable horizontal stack that computes its rows on demand from an underlying collection of identifiable data.
   ///
   /// - Parameters:
-  ///   - data: A collection of identifiable data for computing the vertical stack
+  ///   - data: A collection of identifiable data for computing the horizontal stack
   ///   - onMove: A callback triggered whenever two elements had their positions switched
   ///   - content: A view builder that creates the view for a single element of the list.
   public init(_ data: Data, onMove: @escaping (Int, Int) -> Void, @ViewBuilder content: @escaping (Data.Element) -> Content) {
@@ -43,8 +41,8 @@ public struct ReorderableVStack<Data: RandomAccessCollection, Content: View>: Vi
   @State var coordinateSpaceName: String = UUID().uuidString
   
   public var body: some View {
-    VStack(spacing: 0) {
-      ReorderableStack<VerticalContainerAxis, Data, Content>(data, coordinateSpaceName: coordinateSpaceName, onMove: onMove, content: content)
+    HStack(spacing: 0) {
+      ReorderableStack<HorizontalContainerAxis, Data, Content>(data, coordinateSpaceName: coordinateSpaceName, onMove: onMove, content: content)
     }.coordinateSpace(name: coordinateSpaceName)
   }
 }
@@ -52,20 +50,20 @@ public struct ReorderableVStack<Data: RandomAccessCollection, Content: View>: Vi
 private struct Sample: Identifiable {
   var color: UIColor
   var id: Int
-  var height: CGFloat
+  var width: CGFloat
   
   init(_ color: UIColor, _ id: Int, _ height: CGFloat) {
     self.color = color
     self.id = id
-    self.height = height
+    self.width = height
   }
 }
 
-#Preview("Short Stack") {
+#Preview("Narrow Stack") {
   @Previewable @State var data = [
-    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 100), Sample(UIColor.systemGray, 3, 300)]
+    Sample(UIColor.systemBlue, 1, 100), Sample(UIColor.systemGreen, 2, 50), Sample(UIColor.systemGray, 3, 150)]
   
-    ReorderableVStack(data, onMove: { from, to in
+    ReorderableHStack(data, onMove: { from, to in
       withAnimation {
         data.move(fromOffsets: IndexSet(integer: from),
                   toOffset: (to > from) ? to + 1 : to)
@@ -73,15 +71,15 @@ private struct Sample: Identifiable {
     }) { sample in
       RoundedRectangle(cornerRadius: 32, style: .continuous)
         .fill(Color(sample.color))
-        .frame(height: sample.height)
+        .frame(width: sample.width)
         .padding()
     }
     .padding()
 }
 
-#Preview("Short Stack with Disable Toggle") {
+#Preview("Narrow Stack with Disable Toggle") {
   @Previewable @State var data = [
-    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 100), Sample(UIColor.systemGray, 3, 200)]
+    Sample(UIColor.systemBlue, 1, 100), Sample(UIColor.systemGreen, 2, 50), Sample(UIColor.systemGray, 3, 150)]
   
   @Previewable @State var disableToggle: Bool = true
   
@@ -89,7 +87,7 @@ private struct Sample: Identifiable {
     Toggle("Disable Drag", isOn: $disableToggle)
       .padding(EdgeInsets(top: 0, leading: 36, bottom: 0, trailing: 36))
     
-    ReorderableVStack(data, onMove: { from, to in
+    ReorderableHStack(data, onMove: { from, to in
       withAnimation {
         data.move(fromOffsets: IndexSet(integer: from),
                   toOffset: (to > from) ? to + 1 : to)
@@ -97,7 +95,7 @@ private struct Sample: Identifiable {
     }) { sample in
       RoundedRectangle(cornerRadius: 32, style: .continuous)
         .fill(Color(sample.color))
-        .frame(height: sample.height)
+        .frame(width: sample.width)
         .padding()
     }
     .dragDisabled(disableToggle)
@@ -105,11 +103,11 @@ private struct Sample: Identifiable {
   }
 }
 
-#Preview("Short Stack with Drag State") {
+#Preview("Narrow Stack with Drag State") {
   @Previewable @State var data = [
-    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 100), Sample(UIColor.systemGray, 3, 300)]
+    Sample(UIColor.systemBlue, 1, 100), Sample(UIColor.systemGreen, 2, 50), Sample(UIColor.systemGray, 3, 150)]
   
-    ReorderableVStack(data, onMove: { from, to in
+    ReorderableHStack(data, onMove: { from, to in
       withAnimation {
         data.move(fromOffsets: IndexSet(integer: from),
                   toOffset: (to > from) ? to + 1 : to)
@@ -117,7 +115,7 @@ private struct Sample: Identifiable {
     }) { sample, isDragged in
       RoundedRectangle(cornerRadius: 32, style: .continuous)
         .fill(Color(sample.color))
-        .frame(height: sample.height)
+        .frame(width: sample.width)
         .scaleEffect(isDragged ? 1.1: 1)
         .animation(.easeOut, value: isDragged)
         .padding()
@@ -125,11 +123,11 @@ private struct Sample: Identifiable {
     .padding()
 }
 
-#Preview("Short Stack with Handles") {
+#Preview("Narrow Stack with Handles") {
   @Previewable @State var data = [
-    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 100), Sample(UIColor.systemGray, 3, 300)]
+    Sample(UIColor.systemBlue, 1, 100), Sample(UIColor.systemGreen, 2, 50), Sample(UIColor.systemGray, 3, 150)]
   
-    ReorderableVStack(data, onMove: { from, to in
+    ReorderableHStack(data, onMove: { from, to in
       withAnimation {
         data.move(fromOffsets: IndexSet(integer: from),
                   toOffset: (to > from) ? to + 1 : to)
@@ -138,7 +136,7 @@ private struct Sample: Identifiable {
       ZStack(alignment: .leading) {
         RoundedRectangle(cornerRadius: 32, style: .continuous)
           .fill(Color(sample.color))
-          .frame(height: sample.height)
+          .frame(width: sample.width)
         
         Image(systemName: "line.3.horizontal")
           .foregroundStyle(.secondary)
@@ -150,12 +148,12 @@ private struct Sample: Identifiable {
     }.padding()
 }
 
-#Preview("Tall Stack without Autoscroll") {
+#Preview("Wide Stack without Autoscroll") {
   @Previewable @State var data = [
-    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 200), Sample(UIColor.systemGray, 3, 300), Sample(UIColor.systemMint, 4, 200), Sample(UIColor.systemPurple, 5, 300), Sample(UIColor.orange, 6, 200)]
+    Sample(UIColor.systemBlue, 1, 100), Sample(UIColor.systemGreen, 2, 100), Sample(UIColor.systemGray, 3, 150), Sample(UIColor.systemMint, 4, 100), Sample(UIColor.systemPurple, 5, 150), Sample(UIColor.orange, 6, 100)]
   
-  ScrollView {
-    ReorderableVStack(data, onMove: { from, to in
+  ScrollView([.horizontal]) {
+    ReorderableHStack(data, onMove: { from, to in
       withAnimation {
         data.move(fromOffsets: IndexSet(integer: from),
                   toOffset: (to > from) ? to + 1 : to)
@@ -164,7 +162,7 @@ private struct Sample: Identifiable {
       ZStack(alignment: .leading) {
         RoundedRectangle(cornerRadius: 32, style: .continuous)
           .fill(Color(sample.color))
-          .frame(height: sample.height)
+          .frame(width: sample.width)
         
         Image(systemName: "line.3.horizontal")
           .foregroundStyle(.secondary)
@@ -177,12 +175,12 @@ private struct Sample: Identifiable {
   }
 }
 
-#Preview("Tall Stack with Autoscroll") {
+#Preview("Wide Stack with Autoscroll") {
   @Previewable @State var data = [
-    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 200), Sample(UIColor.systemGray, 3, 300), Sample(UIColor.systemMint, 4, 200), Sample(UIColor.systemPurple, 5, 300), Sample(UIColor.orange, 6, 200)]
+    Sample(UIColor.systemBlue, 1, 100), Sample(UIColor.systemGreen, 2, 100), Sample(UIColor.systemGray, 3, 150), Sample(UIColor.systemMint, 4, 100), Sample(UIColor.systemPurple, 5, 150), Sample(UIColor.orange, 6, 100)]
   
-  ScrollView {
-    ReorderableVStack(data, onMove: { from, to in
+  ScrollView([.horizontal]) {
+    ReorderableHStack(data, onMove: { from, to in
       withAnimation {
         data.move(fromOffsets: IndexSet(integer: from),
                   toOffset: (to > from) ? to + 1 : to)
@@ -191,7 +189,7 @@ private struct Sample: Identifiable {
       ZStack(alignment: .leading) {
         RoundedRectangle(cornerRadius: 32, style: .continuous)
           .fill(Color(sample.color))
-          .frame(height: sample.height)
+          .frame(width: sample.width)
         
         Image(systemName: "line.3.horizontal")
           .foregroundStyle(.secondary)
@@ -204,21 +202,21 @@ private struct Sample: Identifiable {
   }.autoScrollOnEdges()
 }
 
-#Preview("Tall Stack with Autoscroll and Content Before + After") {
+#Preview("Wide Stack with Autoscroll and Content Before + After") {
   @Previewable @State var data = [
     Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 200), Sample(UIColor.systemGray, 3, 300), Sample(UIColor.systemMint, 4, 200), Sample(UIColor.systemPurple, 5, 300), Sample(UIColor.orange, 6, 200)]
   
-  ScrollView {
-    VStack {
+  ScrollView([.horizontal]) {
+    HStack {
       RoundedRectangle(cornerRadius: 32, style: .continuous)
         .fill(Color(UIColor.systemIndigo))
-        .frame(height: 300)
+        .frame(width: 300)
         .padding()
         .overlay {
           Text("Static Content Before")
         }
       
-      ReorderableVStack(data, onMove: { from, to in
+      ReorderableHStack(data, onMove: { from, to in
         withAnimation {
           data.move(fromOffsets: IndexSet(integer: from),
                     toOffset: (to > from) ? to + 1 : to)
@@ -227,7 +225,7 @@ private struct Sample: Identifiable {
         ZStack(alignment: .leading) {
           RoundedRectangle(cornerRadius: 32, style: .continuous)
             .fill(Color(sample.color))
-            .frame(height: sample.height)
+            .frame(width: sample.width)
           
           Image(systemName: "line.3.horizontal")
             .foregroundStyle(.secondary)
@@ -241,7 +239,7 @@ private struct Sample: Identifiable {
       
       RoundedRectangle(cornerRadius: 32, style: .continuous)
         .fill(Color(UIColor.systemRed))
-        .frame(height: 300)
+        .frame(width: 300)
         .padding()
         .overlay {
           Text("Static Content After")
@@ -250,10 +248,9 @@ private struct Sample: Identifiable {
   }.autoScrollOnEdges()
 }
 
-#Preview("Short Stack with Add/Remove") {
+#Preview("Narrow Stack with Add/Remove") {
   @Previewable @State var data = [
-    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 100), Sample(UIColor.systemGray, 3, 200)
-  ]
+    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 100), Sample(UIColor.systemGray, 3, 200)]
     
   VStack {
     Button {
@@ -262,7 +259,7 @@ private struct Sample: Identifiable {
       Text("Add Element")
     }.buttonStyle(.borderedProminent)
     
-    ReorderableVStack(data, onMove: { from, to in
+    ReorderableHStack(data, onMove: { from, to in
       withAnimation {
         data.move(fromOffsets: IndexSet(integer: from),
                   toOffset: (to > from) ? to + 1 : to)
@@ -270,7 +267,7 @@ private struct Sample: Identifiable {
     }) { sample in
       RoundedRectangle(cornerRadius: 32, style: .continuous)
         .fill(Color(sample.color))
-        .frame(height: sample.height)
+        .frame(width: sample.width)
         .padding()
         .overlay {
           Button(role: .destructive) {
@@ -281,52 +278,5 @@ private struct Sample: Identifiable {
         }
     }
     .padding()
-  }
-}
-
-private struct Sample2D: Identifiable {
-  var id: UUID = UUID()
-  var row: [Sample]
-}
-
-#Preview("Short Stack of Narrow Stack") {
-  @Previewable @State var data: [Sample2D] = [
-    .init(row: [.init(UIColor.systemBlue, 1, 200), .init(UIColor.systemGreen, 2, 100), .init(UIColor.systemGray, 3, 200)]),
-    .init(row: [.init(UIColor.systemRed, 1, 200), .init(UIColor.systemMint, 2, 100), .init(UIColor.systemPurple, 3, 200)]),
-    .init(row: [.init(UIColor.systemIndigo, 1, 200), .init(UIColor.systemTeal, 2, 100), .init(UIColor.systemYellow, 3, 200)]),
-  ]
-
-  ReorderableVStack(data, onMove: { from, to in
-    withAnimation {
-      data.move(fromOffsets: IndexSet(integer: from),
-                toOffset: (to > from) ? to + 1 : to)
-    }
-  }) { sample in
-    HStack {
-      ZStack {
-        RoundedRectangle(cornerRadius: 24, style: .continuous)
-          .fill(Color(UIColor.systemOrange))
-          .frame(width: 64, height: 64)
-          .padding()
-       
-        Image(systemName: "line.3.horizontal")
-          .foregroundStyle(.secondary)
-          .padding()
-      }
-      .dragHandle()
-      
-      ReorderableHStack(sample.row, onMove: { from, to in
-        withAnimation {
-          let index = data.firstIndex(where: {$0.id == sample.id})!
-          data[index].row.move(fromOffsets: IndexSet(integer: from),
-                                   toOffset: (to > from) ? to + 1 : to)
-        }
-      }) { sample in
-        RoundedRectangle(cornerRadius: 24, style: .continuous)
-          .fill(Color(sample.color))
-          .frame(width: 64, height: 64)
-          .padding()
-      }
-    }
   }
 }
