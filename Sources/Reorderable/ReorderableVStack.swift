@@ -16,6 +16,7 @@ public struct ReorderableVStack<Data: RandomAccessCollection, Content: View>: Vi
   ///   - content: A view builder that creates the view for a single element of the list, with an extra boolean parameter indicating whether the user is currently dragging the element.
   public init(_ data: Data, onMove: @escaping (Int, Int) -> Void, content: @escaping (Data.Element, Bool) -> Content) {
     self.data = data
+    self.dataKeys = Set(data.map(\.id))
     self.onMove = onMove
     self.content = content
   }
@@ -28,11 +29,18 @@ public struct ReorderableVStack<Data: RandomAccessCollection, Content: View>: Vi
   ///   - content: A view builder that creates the view for a single element of the list.
   public init(_ data: Data, onMove: @escaping (Int, Int) -> Void, @ViewBuilder content: @escaping (Data.Element) -> Content) {
     self.data = data
+    self.dataKeys = Set(data.map(\.id))
     self.onMove = onMove
     self.content = { datum, _ in content(datum) }
   }
   
   var data: Data
+  /// The set of IDs for the elements.
+  ///
+  /// This is used to check whether the element from the `positions` dictionary is actually there. While we are removing the positions using `onDisappear` when an element is removed, there is a race condition where a user could start dragging something before this callback happened.
+  ///
+  /// Sadly, we can't just clean up the removed elemetns in `positions` in `.init` as we can't access state data in there.
+  private let dataKeys: Set<Data.Element.ID>
   
   let onMove: (_ from: Int, _ to: Int) -> Void
   @ViewBuilder var content: (_ data: Data.Element, _ isDragged: Bool) -> Content
@@ -83,6 +91,9 @@ public struct ReorderableVStack<Data: RandomAccessCollection, Content: View>: Vi
               onDrag: { dragCallback($0, $1, datum) },
               onDrop:  { dropCallback($0, datum)},
               isEnabled: !dragDisabled))
+            .onDisappear {
+              positions.removeValue(forKey: datum.id)
+            }
         }
       }.coordinateSpace(name: stackCoordinateSpaceName)
 
@@ -100,11 +111,15 @@ public struct ReorderableVStack<Data: RandomAccessCollection, Content: View>: Vi
 
     if (currentIndex! > initialIndex!) {
       return data[initialIndex!..<currentIndex!].map {
-        positions[$0.id]!.height
+        positionIsValid($0.id) ?
+        positions[$0.id]!.height :
+        0.0
       }.reduce(0.0, -)
     } else if (currentIndex! < initialIndex!) {
       return data[currentIndex! + 1 ... initialIndex!].map {
-        positions[$0.id]!.height
+        positionIsValid($0.id) ?
+        positions[$0.id]!.height :
+        0.0
       }.reduce(0.0, +)
     }
     
@@ -225,7 +240,9 @@ public struct ReorderableVStack<Data: RandomAccessCollection, Content: View>: Vi
   private func checkIntersection(position: CGFloat, dragged: Data.Element.ID?) {
     guard let datumId = dragged else { return }
     let intersect = positions.first(where: {
-      $0.value.contains(position) && $0.key != datumId
+      positionIsValid($0.key) &&
+        $0.value.contains(position) &&
+        $0.key != datumId
     })
     
     guard let element = intersect
@@ -279,13 +296,14 @@ public struct ReorderableVStack<Data: RandomAccessCollection, Content: View>: Vi
       pendingDrop = nil
     }
   }
+  
+  /// Checks whether the element we're checking the position for is valid.
+  ///
+  /// An element gets deleted, there is a moment before the `onDisappear` gets called where calling `onDrag` could result in getting positions of elements that have been removed. This method checks that the element is indeed a valid one.
+  private func positionIsValid(_ id: Data.Element.ID) -> Bool {
+    return dataKeys.contains(id)
+  }
 }
-
-// MARK: Drag Disabling Functionalities
-
-
-
-// MARK: Drag Handle Functionalities
 
 @available(iOS 18.0, *)
 private struct DragCallbacks {
@@ -596,4 +614,37 @@ private struct Sample: Identifiable {
         }
     }
   }.autoScrollOnEdges()
+}
+
+#Preview("Short Stack with Add/Remove") {
+  @Previewable @State var data = [
+    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 100), Sample(UIColor.systemGray, 3, 200)]
+    
+  VStack {
+    Button {
+      data.append(.init(UIColor.systemMint, data.count + 2, 100))
+    } label: {
+      Text("Add Element")
+    }.buttonStyle(.borderedProminent)
+    
+    ReorderableVStack(data, onMove: { from, to in
+      withAnimation {
+        data.move(fromOffsets: IndexSet(integer: from),
+                  toOffset: (to > from) ? to + 1 : to)
+      }
+    }) { sample in
+      RoundedRectangle(cornerRadius: 32, style: .continuous)
+        .fill(Color(sample.color))
+        .frame(height: sample.height)
+        .padding()
+        .overlay {
+          Button(role: .destructive) {
+            data.removeAll(where: { $0.id == sample.id })
+          } label : {
+            Text("Remove")
+          }.buttonStyle(.borderedProminent)
+        }
+    }
+    .padding()
+  }
 }
