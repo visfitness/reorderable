@@ -26,6 +26,10 @@ https://github.com/visfitness/reorderable
 
 To add this package to your XCode project, follow [these instructions](https://developer.apple.com/documentation/xcode/adding-package-dependencies-to-your-app).
 
+## Documentation
+
+The documentation for this package can be found [here](https://visfitness.github.io/reorderable/documentation/reorderable)
+
 ## Usage
 
 > [!NOTE]
