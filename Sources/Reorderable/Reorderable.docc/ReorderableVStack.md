@@ -9,4 +9,4 @@
 
 ### Disabling Reordering
 
-- ``ReorderableHStack/dragDisabled(_:)``
+- ``ReorderableVStack/dragDisabled(_:)``
