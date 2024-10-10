@@ -14,11 +14,11 @@ The second point makes it kind of tedious (but not impossible, see nested sample
 
 - Specify your own drag handle with the `.dragHandle()` modifier
 - Disable/Enable dragging via the `.dragDisabled(_ dragDisabled: Bool)` modifier, which plays nicely with animations (as opposed to adding/removing a `.onDrag()` modifier)
-- Easily customize your drag state via a `isDragged` parameter passed to your `content` `ViewBuilder`. 
+- Easily customize your drag state via a `isDragged` parameter passed to your `content` view builder. 
 
 ## Installation
 
-This component is distributed as a **Swift Package**. Simply add the following URL to your package list:
+This framework is distributed as a **Swift Package**. To use, add the following URL to your package list:
 
 ```
 https://github.com/visfitness/reorderable
@@ -34,12 +34,11 @@ To add this package to your XCode project, follow [these instructions](https://d
 > ```swift
 > private struct Sample: Identifiable {
 >  var color: UIColor
->  var id: Int
+>  var id: UUID = UUID()
 >  var height: CGFloat
 >  
->  init(_ color: UIColor, _ id: Int, _ height: CGFloat) {
+>  init(_ color: UIColor, _ height: CGFloat) {
 >    self.color = color
->    self.id = id
 >    self.height = height
 >  }
 > }
@@ -50,9 +49,9 @@ To add this package to your XCode project, follow [these instructions](https://d
 ```swift
 struct SimpleExample: View {
   @State var data = [
-    Sample(UIColor.systemBlue, 1, 200),
-    Sample(UIColor.systemGreen, 2, 100),
-    Sample(UIColor.systemGray, 3, 300)
+    Sample(UIColor.systemBlue, 200),
+    Sample(UIColor.systemGreen, 100),
+    Sample(UIColor.systemGray, 300)
   ]
   
   var body: some View {
@@ -77,9 +76,9 @@ struct SimpleExample: View {
 ```swift
 struct SimpleExample: View {
   @State var data = [
-    Sample(UIColor.systemBlue, 1, 200),
-    Sample(UIColor.systemGreen, 2, 100),
-    Sample(UIColor.systemGray, 3, 300)
+    Sample(UIColor.systemBlue, 200),
+    Sample(UIColor.systemGreen, 100),
+    Sample(UIColor.systemGray, 300)
   ]
   
   var body: some View {
@@ -117,12 +116,12 @@ struct SimpleExample: View {
 ```swift
 struct SimpleExample: View {
   @State var data = [
-    Sample(UIColor.systemBlue, 1, 200),
-    Sample(UIColor.systemGreen, 2, 200),
-    Sample(UIColor.systemGray, 3, 300),
-    Sample(UIColor.systemMint, 4, 200),
-    Sample(UIColor.systemPurple, 5, 300),
-    Sample(UIColor.orange, 6, 200)
+    Sample(UIColor.systemBlue, 200),
+    Sample(UIColor.systemGreen, 200),
+    Sample(UIColor.systemGray, 300),
+    Sample(UIColor.systemMint, 200),
+    Sample(UIColor.systemPurple, 300),
+    Sample(UIColor.orange, 200)
   ]
   
   var body: some View {  
@@ -153,9 +152,9 @@ private struct Sample2D: Identifiable {
 
 struct SimpleExample: View {
   @State var data: [Sample2D] = [
-    .init(row: [.init(UIColor.systemBlue, 1, 200), .init(UIColor.systemGreen, 2, 100), .init(UIColor.systemGray, 3, 200)]),
-    .init(row: [.init(UIColor.systemRed, 1, 200), .init(UIColor.systemMint, 2, 100), .init(UIColor.systemPurple, 3, 200)]),
-    .init(row: [.init(UIColor.systemIndigo, 1, 200), .init(UIColor.systemTeal, 2, 100), .init(UIColor.systemYellow, 3, 200)]),
+    .init(row: [.init(UIColor.systemBlue, 200), .init(UIColor.systemGreen, 100), .init(UIColor.systemGray, 200)]),
+    .init(row: [.init(UIColor.systemRed, 200), .init(UIColor.systemMint, 100), .init(UIColor.systemPurple, 200)]),
+    .init(row: [.init(UIColor.systemIndigo, 200), .init(UIColor.systemTeal, 100), .init(UIColor.systemYellow, 200)]),
   ]
 
   ReorderableVStack(data, onMove: { from, to in
@@ -193,3 +192,7 @@ struct SimpleExample: View {
   }
 }
 ```
+
+## Copyright and License
+
+Copyright [Vis Fitness Inc](https://vis.fitness). Licensed under the [MIT License](https://github.com/visfitness/reorderable/blob/main/LICENSE)

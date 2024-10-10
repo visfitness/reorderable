@@ -1,6 +1,6 @@
 import SwiftUI
 
-@available(iOS 18.0, *)
+@available(iOS 18.0, macOS 15.0, *)
 package struct DragCallbacks {
   let onDrag: (_ stackDrag: DragGesture.Value, _ scrollDrag: DragGesture.Value) -> Void
   let onDrop: (_ stackDrag: DragGesture.Value) -> Void
@@ -9,12 +9,12 @@ package struct DragCallbacks {
   let isEnabled: Bool
 }
 
-@available(iOS 18.0, *)
+@available(iOS 18.0, macOS 15.0, *)
 private struct DragCallbackKey: @preconcurrency EnvironmentKey {
   @MainActor static let defaultValue: DragCallbacks = .init(onDrag: { _, __ in }, onDrop: { _ in }, dragCoordinatesSpaceName: "", isEnabled: false)
 }
 
-@available(iOS 18.0, *)
+@available(iOS 18.0, macOS 15.0, *)
 extension EnvironmentValues {
   package var reorderableDragCallback: DragCallbacks {
         get { self[DragCallbackKey.self] }
@@ -30,7 +30,7 @@ private struct HasDragHandlePreferenceKey: PreferenceKey {
   }
 }
 
-@available(iOS 18.0, *)
+@available(iOS 18.0, macOS 15.0, *)
 struct DragHandleViewModifier: ViewModifier {
   @Environment(\.reorderableDragCallback) private var dragCallbacks
   @State var alreadyHasDragHandle: Bool = false
@@ -56,9 +56,9 @@ struct DragHandleViewModifier: ViewModifier {
   }
 }
 
-@available(iOS 18.0, *)
+@available(iOS 18.0, macOS 15.0, *)
 extension View {
-  /// Makes this view the handle for dragging the element of the closest `ReorderableVStack` or `ReorderableHStack`.
+  /// Makes this view the handle for dragging the element of the closest ``ReorderableVStack`` or ``ReorderableHStack``.
   ///
   /// Settings this on a subview of the element will make it the only way to move the element around.
   public func dragHandle() -> some View {

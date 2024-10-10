@@ -23,24 +23,24 @@ private struct DragDisabledViewModifier: ViewModifier {
 }
 
 extension ReorderableVStack {
-  /// Adds a condition that controls whether users can drag elements of this `ReorderableVStack`.
+  /// Adds a condition that controls whether users can drag elements of this ``ReorderableVStack``.
   ///
   /// - Parameters:
-  ///    - dragDisabled: A Boolean value that determines whether users can drag elements of this `ReorderableVStack`.
+  ///    - dragDisabled: A Boolean value that determines whether users can drag elements of this ``ReorderableVStack``.
   ///
-  /// - Returns: A view that controls whether users can drag elements of this `ReorderableVStack`.
+  /// - Returns: A view that controls whether users can drag elements of this ``ReorderableVStack``.
   public func dragDisabled(_ dragDisabled: Bool) -> some View {
     modifier(DragDisabledViewModifier(disableDrag: dragDisabled))
   }
 }
 
 extension ReorderableHStack {
-  /// Adds a condition that controls whether users can drag elements of this `ReorderableHStack`.
+  /// Adds a condition that controls whether users can drag elements of this ``ReorderableHStack``.
   ///
   /// - Parameters:
-  ///    - dragDisabled: A Boolean value that determines whether users can drag elements of this `ReorderableHStack`.
+  ///    - dragDisabled: A Boolean value that determines whether users can drag elements of this ``ReorderableHStack``.
   ///
-  /// - Returns: A view that controls whether users can drag elements of this `ReorderableHStack`.
+  /// - Returns: A view that controls whether users can drag elements of this ``ReorderableHStack``.
   public func dragDisabled(_ dragDisabled: Bool) -> some View {
     modifier(DragDisabledViewModifier(disableDrag: dragDisabled))
   }

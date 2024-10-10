@@ -3,7 +3,7 @@ import SwiftUI
 /// A view that arranges its subviews in a line and allows reordering of its elements by drag and dropping.
 ///
 /// Note that this doesn't participate in iOS standard drag-and-drop mechanism and thus dragged elements can't be dropped into other views modified with `.onDrop`.
-@available(iOS 18.0, *)
+@available(iOS 18.0, macOS 15.0, *)
 package struct ReorderableStack<Axis: ContainerAxis, Data: RandomAccessCollection, Content: View>: View where Data.Element: Identifiable, Data.Index == Int {
   
   /// Creates a reorderable stack that computes its rows on demand from an underlying collection of identifiable data, with the added information of whether the user is currently dragging the element.

@@ -6,6 +6,7 @@ let package = Package(
     name: "Reorderable",
     platforms: [
       .iOS(SupportedPlatform.IOSVersion.v18),
+      .macOS(SupportedPlatform.MacOSVersion.v15)
     ],
     products: [
         .library(

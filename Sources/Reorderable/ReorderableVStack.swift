@@ -1,11 +1,11 @@
 import SwiftUI
 
-
-
 /// A view that arranges its subviews in a vertical line and allows reordering of its elements by drag and dropping.
 ///
-/// Note that this doesn't participate in iOS standard drag-and-drop mechanism and thus dragged elements can't be dropped into other views modified with `.onDrop`.
-@available(iOS 18.0, *)
+/// This component uses `DragGesture` based interaction as opposed to the long press based one that comes with [`.onDrag`](https://developer.apple.com/documentation/swiftui/view/ondrag(_:))/[`.draggable`](https://developer.apple.com/documentation/swiftui/view/draggable(_:)).
+///
+/// > Note: While this component allows for drag-and-drop interactions, it doesn't participate in iOS standard drag-and-drop mechanism. Thus dragged elements can't be dropped into other views modified with `.onDrop`.
+@available(iOS 18.0, macOS 15.0, *)
 public struct ReorderableVStack<Data: RandomAccessCollection, Content: View>: View where Data.Element: Identifiable, Data.Index == Int {
   
   /// Creates a reorderable vertical stack that computes its rows on demand from an underlying collection of identifiable data, with the added information of whether the user is currently dragging the element.
@@ -42,6 +42,7 @@ public struct ReorderableVStack<Data: RandomAccessCollection, Content: View>: Vi
   /// we need to mark this as a state to ensure that the coordinate space remains constant.
   @State var coordinateSpaceName: String = UUID().uuidString
   
+  @_documentation(visibility: internal)
   public var body: some View {
     VStack(spacing: 0) {
       ReorderableStack<VerticalContainerAxis, Data, Content>(data, coordinateSpaceName: coordinateSpaceName, onMove: onMove, content: content)
@@ -51,19 +52,18 @@ public struct ReorderableVStack<Data: RandomAccessCollection, Content: View>: Vi
 
 private struct Sample: Identifiable {
   var color: UIColor
-  var id: Int
+  var id: UUID = UUID()
   var height: CGFloat
   
-  init(_ color: UIColor, _ id: Int, _ height: CGFloat) {
+  init(_ color: UIColor, _ height: CGFloat) {
     self.color = color
-    self.id = id
     self.height = height
   }
 }
 
 #Preview("Short Stack") {
   @Previewable @State var data = [
-    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 100), Sample(UIColor.systemGray, 3, 300)]
+    Sample(UIColor.systemBlue, 200), Sample(UIColor.systemGreen, 100), Sample(UIColor.systemGray, 300)]
   
     ReorderableVStack(data, onMove: { from, to in
       withAnimation {
@@ -81,7 +81,7 @@ private struct Sample: Identifiable {
 
 #Preview("Short Stack with Disable Toggle") {
   @Previewable @State var data = [
-    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 100), Sample(UIColor.systemGray, 3, 200)]
+    Sample(UIColor.systemBlue, 200), Sample(UIColor.systemGreen, 100), Sample(UIColor.systemGray, 200)]
   
   @Previewable @State var disableToggle: Bool = true
   
@@ -107,7 +107,7 @@ private struct Sample: Identifiable {
 
 #Preview("Short Stack with Drag State") {
   @Previewable @State var data = [
-    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 100), Sample(UIColor.systemGray, 3, 300)]
+    Sample(UIColor.systemBlue, 200), Sample(UIColor.systemGreen, 100), Sample(UIColor.systemGray, 300)]
   
     ReorderableVStack(data, onMove: { from, to in
       withAnimation {
@@ -127,7 +127,7 @@ private struct Sample: Identifiable {
 
 #Preview("Short Stack with Handles") {
   @Previewable @State var data = [
-    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 100), Sample(UIColor.systemGray, 3, 300)]
+    Sample(UIColor.systemBlue, 200), Sample(UIColor.systemGreen, 100), Sample(UIColor.systemGray, 300)]
   
     ReorderableVStack(data, onMove: { from, to in
       withAnimation {
@@ -152,7 +152,7 @@ private struct Sample: Identifiable {
 
 #Preview("Tall Stack without Autoscroll") {
   @Previewable @State var data = [
-    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 200), Sample(UIColor.systemGray, 3, 300), Sample(UIColor.systemMint, 4, 200), Sample(UIColor.systemPurple, 5, 300), Sample(UIColor.orange, 6, 200)]
+    Sample(UIColor.systemBlue, 200), Sample(UIColor.systemGreen, 200), Sample(UIColor.systemGray, 300), Sample(UIColor.systemMint, 200), Sample(UIColor.systemPurple, 300), Sample(UIColor.orange, 200)]
   
   ScrollView {
     ReorderableVStack(data, onMove: { from, to in
@@ -179,7 +179,7 @@ private struct Sample: Identifiable {
 
 #Preview("Tall Stack with Autoscroll") {
   @Previewable @State var data = [
-    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 200), Sample(UIColor.systemGray, 3, 300), Sample(UIColor.systemMint, 4, 200), Sample(UIColor.systemPurple, 5, 300), Sample(UIColor.orange, 6, 200)]
+    Sample(UIColor.systemBlue, 200), Sample(UIColor.systemGreen, 200), Sample(UIColor.systemGray, 300), Sample(UIColor.systemMint, 200), Sample(UIColor.systemPurple, 300), Sample(UIColor.orange, 200)]
   
   ScrollView {
     ReorderableVStack(data, onMove: { from, to in
@@ -206,7 +206,7 @@ private struct Sample: Identifiable {
 
 #Preview("Tall Stack with Autoscroll and Content Before + After") {
   @Previewable @State var data = [
-    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 200), Sample(UIColor.systemGray, 3, 300), Sample(UIColor.systemMint, 4, 200), Sample(UIColor.systemPurple, 5, 300), Sample(UIColor.orange, 6, 200)]
+    Sample(UIColor.systemBlue, 200), Sample(UIColor.systemGreen, 200), Sample(UIColor.systemGray, 300), Sample(UIColor.systemMint, 200), Sample(UIColor.systemPurple, 300), Sample(UIColor.orange, 200)]
   
   ScrollView {
     VStack {
@@ -252,12 +252,12 @@ private struct Sample: Identifiable {
 
 #Preview("Short Stack with Add/Remove") {
   @Previewable @State var data = [
-    Sample(UIColor.systemBlue, 1, 200), Sample(UIColor.systemGreen, 2, 100), Sample(UIColor.systemGray, 3, 200)
+    Sample(UIColor.systemBlue, 200), Sample(UIColor.systemGreen, 100), Sample(UIColor.systemGray, 200)
   ]
     
   VStack {
     Button {
-      data.append(.init(UIColor.systemMint, data.count + 2, 100))
+      data.append(.init(UIColor.systemMint, 100))
     } label: {
       Text("Add Element")
     }.buttonStyle(.borderedProminent)
@@ -291,9 +291,9 @@ private struct Sample2D: Identifiable {
 
 #Preview("Short Stack of Narrow Stack") {
   @Previewable @State var data: [Sample2D] = [
-    .init(row: [.init(UIColor.systemBlue, 1, 200), .init(UIColor.systemGreen, 2, 100), .init(UIColor.systemGray, 3, 200)]),
-    .init(row: [.init(UIColor.systemRed, 1, 200), .init(UIColor.systemMint, 2, 100), .init(UIColor.systemPurple, 3, 200)]),
-    .init(row: [.init(UIColor.systemIndigo, 1, 200), .init(UIColor.systemTeal, 2, 100), .init(UIColor.systemYellow, 3, 200)]),
+    .init(row: [.init(UIColor.systemBlue, 200), .init(UIColor.systemGreen, 100), .init(UIColor.systemGray, 200)]),
+    .init(row: [.init(UIColor.systemRed, 200), .init(UIColor.systemMint, 100), .init(UIColor.systemPurple, 200)]),
+    .init(row: [.init(UIColor.systemIndigo, 200), .init(UIColor.systemTeal, 100), .init(UIColor.systemYellow, 200)]),
   ]
 
   ReorderableVStack(data, onMove: { from, to in
