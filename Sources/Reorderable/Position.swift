@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Abstract representation of the position of an element along an Axis. Used to abstract computations of the positions across vertical and horizontal stacks.
-package protocol AxisPosition: Equatable{
+package protocol AxisPosition: Equatable, Sendable {
   associatedtype Preference: PreferenceKey where Preference.Value == Self
   
   init(_ rect: CGRect)

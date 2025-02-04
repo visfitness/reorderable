@@ -330,3 +330,52 @@ private struct Sample2D: Identifiable {
     }
   }
 }
+
+#Preview("Using Binding") {
+  @Previewable @State var data = [
+    Sample(UIColor.systemBlue, 200), Sample(UIColor.systemGreen, 100), Sample(UIColor.systemGray, 300)]
+  
+  ReorderableVStack($data) { $sample in
+    RoundedRectangle(cornerRadius: 32, style: .continuous)
+      .fill(Color(sample.color))
+      .frame(height: sample.height)
+      .padding()
+      .onTapGesture {
+        withAnimation {
+          sample.color = [UIColor.systemRed, UIColor.systemYellow, UIColor.systemMint].randomElement()!
+        }
+      }
+  }
+  .padding()
+}
+
+#Preview("Short Stack of Narrow Stack using bindings") {
+  @Previewable @State var data: [Sample2D] = [
+    .init(row: [.init(UIColor.systemBlue, 200), .init(UIColor.systemGreen, 100), .init(UIColor.systemGray, 200)]),
+    .init(row: [.init(UIColor.systemRed, 200), .init(UIColor.systemMint, 100), .init(UIColor.systemPurple, 200)]),
+    .init(row: [.init(UIColor.systemIndigo, 200), .init(UIColor.systemTeal, 100), .init(UIColor.systemYellow, 200)]),
+  ]
+
+  ReorderableVStack($data) { $sample in
+    HStack {
+      ZStack {
+        RoundedRectangle(cornerRadius: 24, style: .continuous)
+          .fill(Color(UIColor.systemOrange))
+          .frame(width: 64, height: 64)
+          .padding()
+       
+        Image(systemName: "line.3.horizontal")
+          .foregroundStyle(.secondary)
+          .padding()
+      }
+      .dragHandle()
+      
+      ReorderableHStack($sample.row) { $sample in
+        RoundedRectangle(cornerRadius: 24, style: .continuous)
+          .fill(Color(sample.color))
+          .frame(width: 64, height: 64)
+          .padding()
+      }
+    }
+  }
+}

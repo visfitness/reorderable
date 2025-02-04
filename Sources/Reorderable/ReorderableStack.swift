@@ -84,7 +84,9 @@ package struct ReorderableStack<Axis: ContainerAxis, Data: RandomAccessCollectio
     ForEach(data) { datum in
       ReorderableElement<Axis.Position, Data.Element, Content>(datum: datum, isDragged: datum.id == dragging, content: content, coordinateSpaceName: coordinateSpaceName)
         .onPreferenceChange(Axis.Position.Preference.self) { pos in
-          positions[datum.id] = pos
+          Task { @MainActor in
+            positions[datum.id] = pos
+          }
         }
         .offset(Axis.asSize(value: offsetFor(id: datum.id)))
         .zIndex(datum.id == dragging || datum.id == pendingDrop ? 10: 0)

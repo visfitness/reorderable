@@ -40,6 +40,28 @@ struct SimpleExample: View {
   ]
   
   var body: some View {
+    ReorderableVStack($data) { $sample in
+      RoundedRectangle(cornerRadius: 32, style: .continuous)
+        .fill(Color(sample.color))
+        .frame(height: sample.height)
+        .padding()
+    }
+    .padding()
+  }
+}
+```
+
+### Using a collection directly with `onMove`.
+
+```swift
+struct SimpleExample: View {
+  @State var data = [
+    Sample(UIColor.systemBlue, 200),
+    Sample(UIColor.systemGreen, 100),
+    Sample(UIColor.systemGray, 300)
+  ]
+  
+  var body: some View {
     ReorderableVStack(data, onMove: { from, to in
       withAnimation {
         data.move(fromOffsets: IndexSet(integer: from),
@@ -67,12 +89,7 @@ struct SimpleExample: View {
   ]
   
   var body: some View {
-    ReorderableVStack(data, onMove: { from, to in
-      withAnimation {
-        data.move(fromOffsets: IndexSet(integer: from),
-                  toOffset: (to > from) ? to + 1 : to)
-      }
-    }) { sample, isDragged in // <------ Notice the additional `isDragged` parameter
+    ReorderableVStack($data) { $sample, isDragged in // <------ Notice the additional `isDragged` parameter
       ZStack(alignment: .leading) {
         RoundedRectangle(cornerRadius: 32, style: .continuous)
           .fill(Color(sample.color))
@@ -110,12 +127,7 @@ struct SimpleExample: View {
   
   var body: some View {  
     ScrollView {
-      ReorderableVStack(data, onMove: { from, to in
-        withAnimation {
-          data.move(fromOffsets: IndexSet(integer: from),
-                    toOffset: (to > from) ? to + 1 : to)
-        }
-      }) { sample in
+      ReorderableVStack($data) { $sample in
         RoundedRectangle(cornerRadius: 32, style: .continuous)
           .fill(Color(sample.color))
           .frame(height: sample.height)
@@ -141,36 +153,27 @@ struct SimpleExample: View {
     .init(row: [.init(UIColor.systemIndigo, 200), .init(UIColor.systemTeal, 100), .init(UIColor.systemYellow, 200)]),
   ]
 
-  ReorderableVStack(data, onMove: { from, to in
-    withAnimation {
-      data.move(fromOffsets: IndexSet(integer: from),
-                toOffset: (to > from) ? to + 1 : to)
-    }
-  }) { sample in
-    HStack {
-      ZStack {
-        RoundedRectangle(cornerRadius: 24, style: .continuous)
-          .fill(Color(UIColor.systemOrange))
-          .frame(width: 64, height: 64)
-          .padding()
-       
-        Image(systemName: "line.3.horizontal")
-          .foregroundStyle(.secondary)
-          .padding()
-      }
-      .dragHandle()
-      
-      ReorderableHStack(sample.row, onMove: { from, to in
-        withAnimation {
-          let index = data.firstIndex(where: {$0.id == sample.id})!
-          data[index].row.move(fromOffsets: IndexSet(integer: from),
-                                   toOffset: (to > from) ? to + 1 : to)
+  var body: some View {
+    ReorderableVStack($data) { $sample in
+      HStack {
+        ZStack {
+          RoundedRectangle(cornerRadius: 24, style: .continuous)
+            .fill(Color(UIColor.systemOrange))
+            .frame(width: 64, height: 64)
+            .padding()
+         
+          Image(systemName: "line.3.horizontal")
+            .foregroundStyle(.secondary)
+            .padding()
         }
-      }) { sample in
-        RoundedRectangle(cornerRadius: 24, style: .continuous)
-          .fill(Color(sample.color))
-          .frame(width: 64, height: 64)
-          .padding()
+        .dragHandle()
+        
+        ReorderableHStack($sample.row) { $sample in
+          RoundedRectangle(cornerRadius: 24, style: .continuous)
+            .fill(Color(sample.color))
+            .frame(width: 64, height: 64)
+            .padding()
+        }
       }
     }
   }

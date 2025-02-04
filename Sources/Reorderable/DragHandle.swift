@@ -37,7 +37,11 @@ struct DragHandleViewModifier: ViewModifier {
   
   func body(content: Content) -> some View {
     content
-      .onPreferenceChange(HasDragHandlePreferenceKey.self) { alreadyHasDragHandle = $0 }
+      .onPreferenceChange(HasDragHandlePreferenceKey.self) { val in
+        Task { @MainActor in
+          alreadyHasDragHandle = val
+        }
+      }
       .gesture(
         SimultaneousGesture(
           DragGesture(minimumDistance: 0, coordinateSpace: .named(dragCallbacks.dragCoordinatesSpaceName)),

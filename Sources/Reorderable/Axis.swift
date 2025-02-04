@@ -1,6 +1,6 @@
 import Foundation
 
-package protocol ContainerAxis {
+package protocol ContainerAxis: Sendable {
   associatedtype Position: AxisPosition
   
   static func project(point: CGPoint) -> CGFloat
