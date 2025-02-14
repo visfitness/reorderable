@@ -9,7 +9,8 @@ This pacakge contains a `ReorderableVStack` and a `ReorderableHStack`.
 
 - Specify your own drag handle with the `.dragHandle()` modifier
 - Disable/Enable dragging via the `.dragDisabled(_ dragDisabled: Bool)` modifier, which plays nicely with animations (as opposed to adding/removing a `.onDrag()` modifier)
-- Easily customize your drag state via a `isDragged` parameter passed to your `content` view builder. 
+- Easily customize your drag state via a `isDragged` parameter passed to your `content` view builder.
+- Haptic feedback on move.
 
 ## Installation
 
