@@ -103,9 +103,9 @@ package struct ReorderableStack<Axis: ContainerAxis, Data: RandomAccessCollectio
         .sensoryFeedback(trigger: currentIndex) { old, new in
           guard !feedbackDisabled else { return nil }
           switch(old, new) {
-            case (.none, .some(_)): print("s"); return .selection
-            case (.some(_), .none): print("s"); return .selection
-            case (.some(_), .some(_)): print("i"); return .impact(weight: .light)
+            case (.none, .some(_)): return .selection
+            case (.some(_), .none): return .selection
+            case (.some(_), .some(_)): return .impact(weight: .light)
             default: return nil
           }
         }
