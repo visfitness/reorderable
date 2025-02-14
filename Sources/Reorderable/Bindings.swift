@@ -8,6 +8,7 @@
 import SwiftUI
 
 public extension ReorderableVStack {
+
   /// Creates a reorderable vertical stack that computes its rows on demande from an underlying collection of identifable data and update the
   /// order of those datum based on the user's interaction.
   ///

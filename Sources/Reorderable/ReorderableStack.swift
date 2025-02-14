@@ -74,6 +74,8 @@ package struct ReorderableStack<Axis: ContainerAxis, Data: RandomAccessCollectio
   
   @Environment(\.dragDisabled) private var dragDisabled: Bool
   
+  @Environment(\.disableSensoryFeedback) private var feedbackDisabled: Bool
+  
   /// Timer used to continually scroll when dragging an element close to the top. We use this rather than an animation because SwiftUI doesn't allow configuring the `ContentOffsetChanged` animation.
   @State private var scrollTimer: Timer?
   
@@ -97,6 +99,15 @@ package struct ReorderableStack<Axis: ContainerAxis, Data: RandomAccessCollectio
           isEnabled: !dragDisabled))
         .onDisappear {
           positions.removeValue(forKey: datum.id)
+        }
+        .sensoryFeedback(trigger: currentIndex) { old, new in
+          guard !feedbackDisabled else { return nil }
+          switch(old, new) {
+            case (.none, .some(_)): print("s"); return .selection
+            case (.some(_), .none): print("s"); return .selection
+            case (.some(_), .some(_)): print("i"); return .impact(weight: .light)
+            default: return nil
+          }
         }
     }
   }
@@ -294,6 +305,7 @@ package struct ReorderableStack<Axis: ContainerAxis, Data: RandomAccessCollectio
       lastChange = nil
       dragging = nil
       displayOffset = 0
+      currentIndex = nil
     } completion: {
       pendingDrop = nil
     }
