@@ -1,7 +1,9 @@
 # SwiftUI Reorderable
-A pure SwiftUI structural component that allows for easy drag-and-drop reordering operations. It enables fast, `DragGesture` based interactions with its elements instead of to the "long press" based one that comes with [`.onDrag`](https://developer.apple.com/documentation/swiftui/view/ondrag(_:))/[`.draggable`](https://developer.apple.com/documentation/swiftui/view/draggable(_:)). Here it is in action in the upcoming [Vis](https://vis.fitness) iOS app: 
+A pure SwiftUI structural component that allows for easy drag-and-drop reordering operations. It enables fast, `DragGesture` based interactions with its elements instead of to the "long press" based one that comes with [`.onDrag`](https://developer.apple.com/documentation/swiftui/view/ondrag(_:))/[`.draggable`](https://developer.apple.com/documentation/swiftui/view/draggable(_:)). Here it is in action in the [Vis](https://vis.fitness) iOS app: 
 
 ![An animated recording of the Vis app, where the user selects the "Reorder Blocks" option and then proceeds to drag blocks from the planned workout around, rearranging their order.](/Documentation/visdemo.gif)
+
+[<img src="Documentation/appstore.svg" alt="Download Vis on the App Store"/>](https://apps.apple.com/us/app/vis-next-generation-workouts/id6743175121)
 
 This package contains a `ReorderableVStack` and a `ReorderableHStack`. 
 
