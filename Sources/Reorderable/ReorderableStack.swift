@@ -77,7 +77,7 @@ package struct ReorderableStack<Axis: ContainerAxis, Data: RandomAccessCollectio
   @Environment(\.disableSensoryFeedback) private var feedbackDisabled: Bool
   
   /// Timer used to continually scroll when dragging an element close to the top. We use this rather than an animation because SwiftUI doesn't allow configuring the `ContentOffsetChanged` animation.
-  @State private var scrollTimer: Timer?
+  @State private var scrollTask: Task<Void, Never>?
   
   /// This is the position of the drag in the ScrollView coordinate space. This is used to prevent some jiggling that can happen with the timer and the drag action.
   @State private var scrollViewDragLocation: CGFloat? = nil
@@ -86,9 +86,7 @@ package struct ReorderableStack<Axis: ContainerAxis, Data: RandomAccessCollectio
     ForEach(data) { datum in
       ReorderableElement<Axis.Position, Data.Element, Content>(datum: datum, isDragged: datum.id == dragging, content: content, coordinateSpaceName: coordinateSpaceName)
         .onPreferenceChange(Axis.Position.Preference.self) { pos in
-          Task { @MainActor in
-            positions[datum.id] = pos
-          }
+          positions[datum.id] = pos
         }
         .offset(Axis.asSize(value: offsetFor(id: datum.id)))
         .zIndex(datum.id == dragging || datum.id == pendingDrop ? 10: 0)
@@ -163,56 +161,55 @@ package struct ReorderableStack<Axis: ContainerAxis, Data: RandomAccessCollectio
     let scrollDragPos = Axis.project(point: scrollDrag.location)
     
     if (scrollDragPos <= bumperSize && Axis.project(maybePoint: pos.wrappedValue.point) ?? 1.0 > 0) {
-      if (scrollTimer == nil) {
+      if (scrollTask == nil) {
         var scrollOffset = Axis.project(point: scrollContainerOffset)
         var dragPos = Axis.project(point: stackDrag.location)
-        
-        scrollTimer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
-          Task { @MainActor in
+
+        scrollTask = Task { @MainActor in
+          while !Task.isCancelled {
             pos.wrappedValue.scrollTo(point: Axis.asPoint(value: scrollOffset))
-            
             checkIntersection(position: dragPos, dragged: dragging)
             scrollOffset -= speed
             dragPos -= speed
-            
-            
+
             if (Axis.project(maybePoint: pos.wrappedValue.point) ?? 0.0 <= 0) {
-              scrollTimer?.invalidate()
-              scrollTimer = nil
+              break
             } else {
-              // Put this after the check to avoid unecessary jiggle when at the top.
+              // Put this after the check to avoid unnecessary jiggle when at the top.
               displayOffset -= speed
             }
+
+            try? await Task.sleep(nanoseconds: 10_000_000)
           }
         }
       }
     } else if (scrollDragPos >= Axis.project(size: bounds) - bumperSize && Axis.project(maybePoint: pos.wrappedValue.point) ?? 0.0 < scrollEnd) {
-      if (scrollTimer == nil) {
+      if (scrollTask == nil) {
         var scrollOffset = Axis.project(point: scrollContainerOffset)
         var dragPos = Axis.project(point: stackDrag.location)
-        
-        scrollTimer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
-          Task { @MainActor in
+
+        scrollTask = Task { @MainActor in
+          while !Task.isCancelled {
             pos.wrappedValue.scrollTo(point: Axis.asPoint(value: scrollOffset))
-            
             checkIntersection(position: dragPos, dragged: dragging)
             scrollOffset += speed
             dragPos += speed
-            
+
             if (Axis.project(maybePoint: pos.wrappedValue.point) ?? Axis.project(size: bounds) >= scrollEnd) {
-              scrollTimer?.invalidate()
-              scrollTimer = nil
+              break
             } else {
-              // Put this after the check to avoid unecessary jiggle when at the top.
+              // Put this after the check to avoid unnecessary jiggle when at the top.
               displayOffset += speed
             }
+
+            try? await Task.sleep(nanoseconds: 10_000_000)
           }
         }
       }
     } else {
-      if (scrollTimer != nil) {
-        scrollTimer?.invalidate()
-        scrollTimer = nil
+      if (scrollTask != nil) {
+        scrollTask?.cancel()
+        scrollTask = nil
       }
     }
   }
@@ -223,7 +220,7 @@ package struct ReorderableStack<Axis: ContainerAxis, Data: RandomAccessCollectio
       scrollViewDragLocation = Axis.project(point: scrollDrag.location)
     }
 
-    if (scrollTimer != nil) {
+    if (scrollTask != nil) {
       // There is some jiggling that happens when scrolling due
       // to some drag events firing in a weird order with the scroll
       // timer. This isn't perfect but it's good enough for now.
@@ -296,9 +293,8 @@ package struct ReorderableStack<Axis: ContainerAxis, Data: RandomAccessCollectio
   }
   
   private func dropCallback(_ drag: DragGesture.Value, _ datum: Data.Element) {
-    scrollTimer?.invalidate()
-    scrollTimer = nil
-    scrollViewDragLocation = nil
+    scrollTask?.cancel()
+    scrollTask = nil
     
     withAnimation {
       pendingDrop = dragging
